@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Asset Converter</title>
+    <style>
+        textarea { width: 100%; height: 200px; }
+    </style>
+</head>
+<body>
+    <h2>Image to Base64 Converter</h2>
+    <input type="file" id="fileInput" multiple accept="image/*,.json">
+    <textarea id="output"></textarea>
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const output = document.getElementById('output');
+        
+        fileInput.addEventListener('change', async (e) => {
+            const files = e.target.files;
+            let result = 'const gameAssets = {\n';
+            
+            for (let file of files) {
+                const key = file.name.split('.')[0];
+                
+                if (file.name.endsWith('.json')) {
+                    // Handle JSON files
+                    const text = await file.text();
+                    result += `    ${key}: ${text},\n`;
+                } else {
+                    // Handle images
+                    const base64 = await fileToBase64(file);
+                    result += `    ${key}: '${base64}',\n`;
+                }
+            }
+            
+            result += '};';
+            output.value = result;
+        });
+
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    resolve(reader.result);
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+    </script>
+</body>
+</html> 
